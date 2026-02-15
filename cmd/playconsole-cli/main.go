@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/AndroidPoet/playconsole-cli/cmd/playconsole-cli/commands"
@@ -16,6 +17,7 @@ var (
 func main() {
 	commands.SetVersionInfo(version, commit, date)
 	if err := commands.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }
