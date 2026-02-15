@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anthropics/gpc/internal/api"
-	"github.com/anthropics/gpc/internal/cli"
-	"github.com/anthropics/gpc/internal/output"
+	"github.com/AndroidPoet/gpc/internal/api"
+	"github.com/AndroidPoet/gpc/internal/cli"
+	"github.com/AndroidPoet/gpc/internal/output"
 )
 
 var AppsCmd = &cobra.Command{

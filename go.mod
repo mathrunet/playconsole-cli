@@ -1,4 +1,4 @@
-module github.com/anthropics/gpc
+module github.com/AndroidPoet/gpc
 
 go 1.25.6
 

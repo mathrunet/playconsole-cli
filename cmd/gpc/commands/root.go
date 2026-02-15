@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/anthropics/gpc/internal/cli"
-	"github.com/anthropics/gpc/internal/config"
-	"github.com/anthropics/gpc/internal/output"
+	"github.com/AndroidPoet/gpc/internal/cli"
+	"github.com/AndroidPoet/gpc/internal/config"
+	"github.com/AndroidPoet/gpc/internal/output"
 )
 
 var (

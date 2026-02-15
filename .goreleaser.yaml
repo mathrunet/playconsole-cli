@@ -62,9 +62,9 @@ changelog:
 brews:
   - name: gpc
     repository:
-      owner: anthropics
+      owner: AndroidPoet
       name: homebrew-tap
-    homepage: https://github.com/anthropics/gpc
+    homepage: https://github.com/AndroidPoet/gpc
     description: "Fast, lightweight, and scriptable CLI for Google Play Console"
     license: MIT
     install: |
@@ -75,8 +75,8 @@ brews:
 nfpms:
   - id: packages
     package_name: gpc
-    vendor: Anthropic
-    homepage: https://github.com/anthropics/gpc
+    vendor: AndroidPoet
+    homepage: https://github.com/AndroidPoet/gpc
     description: "Fast, lightweight, and scriptable CLI for Google Play Console"
     license: MIT
     formats:
@@ -85,7 +85,7 @@ nfpms:
 
 release:
   github:
-    owner: anthropics
+    owner: AndroidPoet
     name: gpc
   draft: true
   prerelease: auto

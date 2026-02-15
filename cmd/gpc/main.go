@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/anthropics/gpc/cmd/gpc/commands"
+	"github.com/AndroidPoet/gpc/cmd/gpc/commands"
 )
 
 // Version information (set by build)

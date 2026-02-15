@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/anthropics/gpc/internal/config"
-	"github.com/anthropics/gpc/internal/output"
+	"github.com/AndroidPoet/gpc/internal/config"
+	"github.com/AndroidPoet/gpc/internal/output"
 )
 
 var AuthCmd = &cobra.Command{

@@ -1,13 +1,10 @@
 #!/bin/bash
 # gpc - Google Play Console CLI installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/anthropics/gpc/main/install.sh | bash
-#
-# For private repos, set GITHUB_TOKEN:
-#   curl -fsSL -H "Authorization: token $GITHUB_TOKEN" https://raw.githubusercontent.com/ORG/gpc/main/install.sh | GITHUB_TOKEN=$GITHUB_TOKEN bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/AndroidPoet/gpc/main/install.sh | bash
 
 set -e
 
-REPO="${GPC_REPO:-anthropics/gpc}"
+REPO="${GPC_REPO:-AndroidPoet/gpc}"
 INSTALL_DIR="${GPC_INSTALL_DIR:-$HOME/.local/bin}"
 VERSION="${GPC_VERSION:-latest}"
 
