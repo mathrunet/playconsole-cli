@@ -1,0 +1,91 @@
+# GoReleaser configuration for gpc
+# https://goreleaser.com
+
+version: 2
+
+project_name: gpc
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: gpc
+    main: ./cmd/gpc
+    binary: gpc
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+
+brews:
+  - name: gpc
+    repository:
+      owner: anthropics
+      name: homebrew-tap
+    homepage: https://github.com/anthropics/gpc
+    description: "Fast, lightweight, and scriptable CLI for Google Play Console"
+    license: MIT
+    install: |
+      bin.install "gpc"
+    test: |
+      system "#{bin}/gpc", "version"
+
+nfpms:
+  - id: packages
+    package_name: gpc
+    vendor: Anthropic
+    homepage: https://github.com/anthropics/gpc
+    description: "Fast, lightweight, and scriptable CLI for Google Play Console"
+    license: MIT
+    formats:
+      - deb
+      - rpm
+
+release:
+  github:
+    owner: anthropics
+    name: gpc
+  draft: true
+  prerelease: auto
