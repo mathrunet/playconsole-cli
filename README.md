@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🚀 Play Console CLI
+<img src="assets/logo.png" alt="Play Console CLI" width="200">
+
+# Play Console CLI
 
 ### Ship Android apps from your terminal
 
