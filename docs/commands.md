@@ -34,6 +34,10 @@ Upload and manage Android App Bundles.
 ```bash
 gpc bundles upload --file app.aab --track internal    # Upload AAB to track
 gpc bundles list                                       # List uploaded bundles
+gpc bundles find --version-code 42                     # Find bundle by version code
+gpc bundles wait --version-code 42                     # Wait for processing to complete
+gpc bundles wait --version-code 42 --timeout 5m        # Custom timeout
+gpc bundles wait --version-code 42 --interval 30s      # Custom poll interval
 ```
 
 ### apks

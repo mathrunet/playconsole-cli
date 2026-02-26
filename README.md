@@ -91,6 +91,8 @@ gpc tracks promote --from internal --to production --rollout 10
 
 ```bash
 gpc bundles upload --file app.aab --track internal    # Upload
+gpc bundles find --version-code 42                     # Find by version code
+gpc bundles wait --version-code 42                     # Wait for processing
 gpc tracks list                                        # List tracks
 gpc tracks promote --from internal --to beta           # Promote
 gpc tracks update --track production --rollout 50     # Staged rollout

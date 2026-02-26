@@ -38,6 +38,23 @@ var listCmd = &cobra.Command{
 	RunE:  runList,
 }
 
+var findCmd = &cobra.Command{
+	Use:   "find",
+	Short: "Find a bundle by version code",
+	RunE:  runFind,
+}
+
+var waitCmd = &cobra.Command{
+	Use:   "wait",
+	Short: "Wait for bundle processing to complete",
+	Long: `Poll until Google Play finishes processing a bundle.
+
+Processing includes app signing, APK generation, and optimization.
+The command exits successfully once generated APKs are available,
+or fails if the timeout is reached.`,
+	RunE: runWait,
+}
+
 var (
 	filePath    string
 	trackName   string
@@ -45,6 +62,9 @@ var (
 	releaseNotes string
 	releaseNotesLang string
 	rolloutPct  float64
+	versionCode int64
+	waitTimeout time.Duration
+	pollInterval time.Duration
 )
 
 func init() {
@@ -57,8 +77,20 @@ func init() {
 	uploadCmd.Flags().Float64Var(&rolloutPct, "rollout", 100, "rollout percentage (only for production)")
 	uploadCmd.MarkFlagRequired("file")
 
+	// Find flags
+	findCmd.Flags().Int64Var(&versionCode, "version-code", 0, "version code to find")
+	findCmd.MarkFlagRequired("version-code")
+
+	// Wait flags
+	waitCmd.Flags().Int64Var(&versionCode, "version-code", 0, "version code to wait for")
+	waitCmd.Flags().DurationVar(&waitTimeout, "timeout", 10*time.Minute, "maximum time to wait")
+	waitCmd.Flags().DurationVar(&pollInterval, "interval", 15*time.Second, "polling interval")
+	waitCmd.MarkFlagRequired("version-code")
+
 	BundlesCmd.AddCommand(uploadCmd)
 	BundlesCmd.AddCommand(listCmd)
+	BundlesCmd.AddCommand(findCmd)
+	BundlesCmd.AddCommand(waitCmd)
 }
 
 // BundleInfo represents bundle information
@@ -216,4 +248,97 @@ func runList(cmd *cobra.Command, args []string) error {
 	}
 
 	return output.Print(result)
+}
+
+func runFind(cmd *cobra.Command, args []string) error {
+	if err := cli.RequirePackage(cmd); err != nil {
+		return err
+	}
+
+	client, err := api.NewClient(cli.GetPackageName(), 60*time.Second)
+	if err != nil {
+		return err
+	}
+
+	edit, err := client.CreateEdit()
+	if err != nil {
+		return err
+	}
+	defer edit.Close()
+	defer edit.Delete()
+
+	bundles, err := edit.Bundles().List(client.GetPackageName(), edit.ID()).Context(edit.Context()).Do()
+	if err != nil {
+		return err
+	}
+
+	for _, b := range bundles.Bundles {
+		if b.VersionCode == versionCode {
+			return output.Print(BundleInfo{
+				VersionCode: b.VersionCode,
+				SHA1:        b.Sha1,
+				SHA256:      b.Sha256,
+			})
+		}
+	}
+
+	return fmt.Errorf("bundle with version code %d not found", versionCode)
+}
+
+func runWait(cmd *cobra.Command, args []string) error {
+	if err := cli.RequirePackage(cmd); err != nil {
+		return err
+	}
+
+	if cli.IsDryRun() {
+		output.PrintInfo("Dry run: would poll version code %d (timeout %s, interval %s)",
+			versionCode, waitTimeout, pollInterval)
+		return nil
+	}
+
+	client, err := api.NewClient(cli.GetPackageName(), 60*time.Second)
+	if err != nil {
+		return err
+	}
+
+	output.PrintInfo("Waiting for bundle %d to finish processing...", versionCode)
+
+	deadline := time.Now().Add(waitTimeout)
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	for {
+		ctx, cancel := client.Context()
+		resp, err := client.GeneratedAPKs().List(client.GetPackageName(), versionCode).Context(ctx).Do()
+		cancel()
+
+		if err == nil && len(resp.GeneratedApks) > 0 {
+			// Count total generated APKs
+			total := 0
+			for _, key := range resp.GeneratedApks {
+				total += len(key.GeneratedSplitApks) + len(key.GeneratedStandaloneApks)
+				if key.GeneratedUniversalApk != nil {
+					total++
+				}
+			}
+
+			output.PrintSuccess("Bundle %d processed (%d APKs generated)", versionCode, total)
+			return output.Print(struct {
+				VersionCode   int64 `json:"version_code"`
+				SigningKeys   int   `json:"signing_keys"`
+				GeneratedAPKs int   `json:"generated_apks"`
+			}{
+				VersionCode:   versionCode,
+				SigningKeys:   len(resp.GeneratedApks),
+				GeneratedAPKs: total,
+			})
+		}
+
+		if time.Now().After(deadline) {
+			return fmt.Errorf("timeout: bundle %d not processed after %s", versionCode, waitTimeout)
+		}
+
+		output.PrintInfo("Still processing... (next check in %s)", pollInterval)
+		<-ticker.C
+	}
 }
