@@ -228,6 +228,26 @@ base64 < service-account.json | xclip   # Linux
 
 ---
 
+## 🤖 Agent Skills
+
+Use `gpc` with AI coding agents. Install the skill pack and your agent learns every command — releases, metadata, monetization, vitals, and more.
+
+```bash
+npx skills add AndroidPoet/playconsole-cli-skills
+```
+
+Then just ask:
+
+```
+Upload my AAB to the internal track and wait for processing
+Show me the crash rate for the last 7 days
+Set up a staged rollout to production starting at 5%
+```
+
+[Browse all 12 skills →](https://github.com/AndroidPoet/playconsole-cli-skills)
+
+---
+
 ## ⚙️ Environment Variables
 
 | Variable | Description |
