@@ -16,6 +16,7 @@ type Profile struct {
 	CredentialsPath string `json:"credentials_path,omitempty"`
 	CredentialsB64  string `json:"credentials_b64,omitempty"`
 	DefaultPackage  string `json:"default_package,omitempty"`
+	DeveloperID     string `json:"developer_id,omitempty"`
 }
 
 // Config represents the playconsole-cli configuration
@@ -75,12 +76,19 @@ func Init(cfgFile, profileName string) error {
 		currentProfile = &Profile{Name: profileName}
 	}
 
-	// Override credentials from environment if set
-	if credPath := viper.GetString("credentials_path"); credPath != "" {
-		currentProfile.CredentialsPath = credPath
+	// Use environment credentials only as fallback when profile has none
+	if currentProfile.CredentialsPath == "" && currentProfile.CredentialsB64 == "" {
+		if credPath := viper.GetString("credentials_path"); credPath != "" {
+			currentProfile.CredentialsPath = credPath
+		}
+		if credB64 := viper.GetString("credentials_b64"); credB64 != "" {
+			currentProfile.CredentialsB64 = credB64
+		}
 	}
-	if credB64 := viper.GetString("credentials_b64"); credB64 != "" {
-		currentProfile.CredentialsB64 = credB64
+
+	// Propagate developer_id from profile if not set via flag/env
+	if viper.GetString("developer_id") == "" && currentProfile.DeveloperID != "" {
+		viper.Set("developer_id", currentProfile.DeveloperID)
 	}
 
 	return nil

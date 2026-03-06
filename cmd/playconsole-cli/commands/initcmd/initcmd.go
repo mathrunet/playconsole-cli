@@ -25,16 +25,18 @@ or any parent directory.`,
 }
 
 var (
-	initPackage string
-	initTrack   string
-	initOutput  string
-	force       bool
+	initPackage     string
+	initTrack       string
+	initOutput      string
+	initDeveloperID string
+	force           bool
 )
 
 func init() {
 	InitCmd.Flags().StringVar(&initPackage, "package", "", "app package name (e.g., com.example.app)")
 	InitCmd.Flags().StringVar(&initTrack, "track", "internal", "default release track")
 	InitCmd.Flags().StringVar(&initOutput, "output", "json", "default output format")
+	InitCmd.Flags().StringVar(&initDeveloperID, "developer-id", "", "developer account ID")
 	InitCmd.Flags().BoolVar(&force, "force", false, "overwrite existing .gpc.yaml")
 }
 
@@ -59,6 +61,12 @@ func runInit(cmd *cobra.Command, args []string) error {
 		content += fmt.Sprintf("package: %s\n", initPackage)
 	} else {
 		content += "# package: com.example.app\n"
+	}
+
+	if initDeveloperID != "" {
+		content += fmt.Sprintf("developer_id: %s\n", initDeveloperID)
+	} else {
+		content += "# developer_id: 1234567890\n"
 	}
 
 	content += fmt.Sprintf("track: %s\n", initTrack)

@@ -49,10 +49,13 @@ func runDoctor(cmd *cobra.Command, args []string) error {
 	// 3. Service account validity
 	results = append(results, checkServiceAccount())
 
-	// 4. Package name
+	// 4. Developer Account
+	results = append(results, checkDeveloperAccount())
+
+	// 5. Package name
 	results = append(results, checkPackageName())
 
-	// 5. Android Publisher API
+	// 6. Android Publisher API
 	pkgName := cli.GetPackageName()
 	if pkgName != "" {
 		results = append(results, checkPublisherAPI(pkgName))
@@ -174,6 +177,45 @@ func checkServiceAccount() CheckResult {
 		Check:   "Service Account",
 		Status:  "pass",
 		Message: msg,
+	}
+}
+
+func checkDeveloperAccount() CheckResult {
+	developerID := cli.GetDeveloperID()
+	if developerID != "" {
+		return CheckResult{
+			Check:   "Developer Account",
+			Status:  "pass",
+			Message: fmt.Sprintf("developer_id=%s (configured)", developerID),
+		}
+	}
+
+	// Try to resolve via API
+	client, err := api.NewClient("", 30*time.Second)
+	if err != nil {
+		return CheckResult{
+			Check:   "Developer Account",
+			Status:  "warn",
+			Message: "no developer_id configured, using wildcard (developers/-). Set --developer-id to target a specific account",
+		}
+	}
+
+	ctx, cancel := client.Context()
+	defer cancel()
+
+	users, err := client.Users().List("developers/-").Context(ctx).Do()
+	if err != nil {
+		return CheckResult{
+			Check:   "Developer Account",
+			Status:  "warn",
+			Message: fmt.Sprintf("no developer_id configured and wildcard resolve failed: %v", err),
+		}
+	}
+
+	return CheckResult{
+		Check:   "Developer Account",
+		Status:  "warn",
+		Message: fmt.Sprintf("no developer_id configured, wildcard resolved (%d users). Set --developer-id to ensure correct account", len(users.Users)),
 	}
 }
 

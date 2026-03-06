@@ -87,7 +87,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	// Note: The Users API requires the developer ID, which is obtained from the parent
 	// For this implementation, we'll show how the API would be called
-	users, err := client.Users().List("developers/-").Context(ctx).Do()
+	users, err := client.Users().List(cli.GetDeveloperParent()).Context(ctx).Do()
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func runGrant(cmd *cobra.Command, args []string) error {
 	}
 
 	// The parent path for grants is: developers/{developer_id}/users/{email}
-	parent := fmt.Sprintf("developers/-/users/%s", email)
+	parent := fmt.Sprintf("%s/users/%s", cli.GetDeveloperParent(), email)
 
 	created, err := client.Grants().Create(parent, grant).Context(ctx).Do()
 	if err != nil {
@@ -183,7 +183,7 @@ func runRevoke(cmd *cobra.Command, args []string) error {
 	defer cancel()
 
 	// The grant name format is: developers/{developer_id}/users/{email}/grants/{package_name}
-	grantName := fmt.Sprintf("developers/-/users/%s/grants/%s", email, cli.GetPackageName())
+	grantName := fmt.Sprintf("%s/users/%s/grants/%s", cli.GetDeveloperParent(), email, cli.GetPackageName())
 
 	err = client.Grants().Delete(grantName).Context(ctx).Do()
 	if err != nil {

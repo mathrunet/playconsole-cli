@@ -12,6 +12,7 @@ var (
 	profile     string
 	timeout     string
 	dryRun      bool
+	developerID string
 )
 
 // SetPackageName sets the package name from the flag
@@ -78,6 +79,28 @@ func RequirePackage(cmd *cobra.Command) error {
 		return fmt.Errorf("package name required: use --package flag or set GPC_PACKAGE environment variable")
 	}
 	return nil
+}
+
+// SetDeveloperID sets the developer ID from the flag
+func SetDeveloperID(d string) {
+	developerID = d
+}
+
+// GetDeveloperID returns the developer ID from flag, env, or config
+func GetDeveloperID() string {
+	if developerID != "" {
+		return developerID
+	}
+	return viper.GetString("developer_id")
+}
+
+// GetDeveloperParent returns the developer parent string for API calls.
+// Returns "developers/{id}" if developer ID is set, or "developers/-" as wildcard.
+func GetDeveloperParent() string {
+	if id := GetDeveloperID(); id != "" {
+		return fmt.Sprintf("developers/%s", id)
+	}
+	return "developers/-"
 }
 
 // CheckConfirm validates confirmation for destructive operations

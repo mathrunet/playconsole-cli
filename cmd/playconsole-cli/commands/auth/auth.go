@@ -2,12 +2,14 @@ package auth
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
+	"github.com/AndroidPoet/playconsole-cli/internal/cli"
 	"github.com/AndroidPoet/playconsole-cli/internal/config"
 	"github.com/AndroidPoet/playconsole-cli/internal/output"
 )
@@ -59,6 +61,7 @@ var (
 	credentialsPath string
 	credentialsB64  string
 	defaultPackage  string
+	developerIDFlag string
 )
 
 func init() {
@@ -67,6 +70,7 @@ func init() {
 	loginCmd.Flags().StringVar(&credentialsPath, "credentials", "", "path to service account JSON file")
 	loginCmd.Flags().StringVar(&credentialsB64, "credentials-base64", "", "base64-encoded service account JSON")
 	loginCmd.Flags().StringVar(&defaultPackage, "default-package", "", "default package name for this profile")
+	loginCmd.Flags().StringVar(&developerIDFlag, "developer-id", "", "developer account ID for this profile")
 
 	// Switch flags
 	switchCmd.Flags().StringVar(&profileName, "name", "", "profile name to switch to")
@@ -119,6 +123,7 @@ func runLogin(cmd *cobra.Command, args []string) error {
 		CredentialsPath: credentialsPath,
 		CredentialsB64:  credentialsB64,
 		DefaultPackage:  defaultPackage,
+		DeveloperID:     developerIDFlag,
 	}
 
 	// Save to config
@@ -205,11 +210,30 @@ func runCurrent(cmd *cobra.Command, args []string) error {
 		credsType = "base64"
 	}
 
-	return output.Print(map[string]interface{}{
+	result := map[string]interface{}{
 		"name":             profile.Name,
 		"credentials_type": credsType,
 		"default_package":  profile.DefaultPackage,
-	})
+	}
+
+	// Extract service account details from credentials
+	if creds, err := config.GetCredentials(); err == nil {
+		var sa struct {
+			ClientEmail string `json:"client_email"`
+			ProjectID   string `json:"project_id"`
+		}
+		if json.Unmarshal(creds, &sa) == nil {
+			result["client_email"] = sa.ClientEmail
+			result["project_id"] = sa.ProjectID
+		}
+	}
+
+	// Show developer_id if configured
+	if did := cli.GetDeveloperID(); did != "" {
+		result["developer_id"] = did
+	}
+
+	return output.Print(result)
 }
 
 func runDelete(cmd *cobra.Command, args []string) error {

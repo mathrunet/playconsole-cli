@@ -23,6 +23,7 @@ var (
 	debug       bool
 	timeout     string
 	dryRun      bool
+	developerID string
 
 	versionStr string
 	commitStr  string
@@ -64,6 +65,7 @@ Design Philosophy:
 		cli.SetProfile(profile)
 		cli.SetTimeout(timeout)
 		cli.SetDryRun(dryRun)
+		cli.SetDeveloperID(developerID)
 
 		// Initialize config
 		if err := config.Init(cfgFile, profile); err != nil {
@@ -103,6 +105,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "show API requests/responses")
 	rootCmd.PersistentFlags().StringVar(&timeout, "timeout", "60s", "request timeout")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "preview changes without applying")
+	rootCmd.PersistentFlags().StringVar(&developerID, "developer-id", "", "developer account ID (or GPC_DEVELOPER_ID env)")
 
 	// Bind to viper
 	viper.BindPFlag("package", rootCmd.PersistentFlags().Lookup("package"))
@@ -110,6 +113,7 @@ func init() {
 	viper.BindPFlag("output", rootCmd.PersistentFlags().Lookup("output"))
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 	viper.BindPFlag("timeout", rootCmd.PersistentFlags().Lookup("timeout"))
+	viper.BindPFlag("developer_id", rootCmd.PersistentFlags().Lookup("developer-id"))
 
 	// Environment variable bindings
 	viper.BindEnv("package", "GPC_PACKAGE")
@@ -119,6 +123,7 @@ func init() {
 	viper.BindEnv("timeout", "GPC_TIMEOUT")
 	viper.BindEnv("credentials_path", "GPC_CREDENTIALS_PATH")
 	viper.BindEnv("credentials_b64", "GPC_CREDENTIALS_B64")
+	viper.BindEnv("developer_id", "GPC_DEVELOPER_ID")
 
 	// Add version command
 	rootCmd.AddCommand(&cobra.Command{
