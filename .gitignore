@@ -38,3 +38,4 @@ Thumbs.db
 .claude/
 .tldr/
 .tldrignore
+firebase-debug.log
